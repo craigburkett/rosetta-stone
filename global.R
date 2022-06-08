@@ -542,7 +542,7 @@ get_class_stats <- function(preds, actuals, probs, yesClass, propPos, alpha=1) {
   n    = sum(!is.na(preds))
   
   randPreds = rbernoulli(n, propPos)
-  skill = 1 - Mse(preds == yesClass, actuals == yesClass) / Mse(randPreds, actuals == yesClass)
+  skill = 1 - get_loss(preds == yesClass, actuals == yesClass) / get_loss(randPreds, actuals == yesClass)
   
   list(accuracy= acc, recall= tpr, precision= tpa, Fscore= f, FalphaScore= fAlpha, MCC= mcc, inform= inf, marked= mar, AUC= auc, skill= skill) # nData= n, tp=tp, tn=tn, fp=fp, fn=fn, 
 }
