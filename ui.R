@@ -45,7 +45,7 @@ UIBinColWidth = 2
 
 header = dashboardHeader(
   title = span(
-    tags$img(height = "45px", alt= "SNAP Logo", src='BSClogoTrans.png')
+    tags$img(height = "45px", alt= "SNAP Logo", src='logo-shiny-cropped.jpg')
     , HTML(paste(webPageTitle, "<sup> BETA </sup>"))) # <sub>v0.1</sub>
   , titleWidth = 500
   , dropdownMenu(type = "messages", icon = icon("info-circle"), 
