@@ -468,7 +468,7 @@ gg_time2 <- function(dd, xVar, yVar, idVar="", groupVar="", facetVar="", iAgg=F,
   if(iAgg && iErrorBars && AggType == "mean") p = p + geom_errorbar(aes(ymin = !!ensym(yVar) - CI, ymax = !!ensym(yVar) + CI), color="black", lty=2, width=0.1, position=pd)
   
   # Layers to add regardless
-  p = p + geom_line(position=pd) + geom_point(linewidth=3, shape=21, fill="white", position=pd) # Add point last to have nice fill
+  p = p + geom_line(position=pd) + geom_point(size=3, shape=21, fill="white", position=pd) # Add point last to have nice fill
   
   # Optional faceting
   if(facetVar != "" && iFreeScales) p = p + facet_wrap(as.formula(paste("~", facetVar)), scales = "free_y")
@@ -532,7 +532,7 @@ gg_time <- function(dd, xVar, yVar, idVar="", groupVar="", facetVar="", iAvg=F, 
   if(iAvg & iErrorBars) p = p + geom_errorbar(aes(ymin = !!ensym(yVar) - CI, ymax = !!ensym(yVar) + CI), color="black", width=0.1, position=pd)
   
   # Layers to add regardless
-  p = p + geom_line(position=pd) + geom_point(linewidth=3, shape=21, fill="white", position=pd) # Add point last to have nice fill
+  p = p + geom_line(position=pd) + geom_point(size=3, shape=21, fill="white", position=pd) # Add point last to have nice fill
   
   # Optional faceting
   if(facetVar != "" & iFreeScales) p = p + facet_wrap(as.formula(paste("~", facetVar)), scales = "free")
