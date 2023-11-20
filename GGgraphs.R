@@ -189,7 +189,7 @@ gg_hist <- function(dd, dashPt = NA, iFreqPoly=F, iDensity=F, filename="", tit="
         facet_wrap(~ group)
     }
     else if(iFreqPoly){
-      h = h + geom_freqpoly(aes(y= after_stat(density), colour= group), bins = myBins, size= 1.5) +
+      h = h + geom_freqpoly(aes(y= after_stat(density), colour= group), bins = myBins, linewidth= 1.5) +
         scale_colour_manual(values = colFunc(colourCount)) #+ theme(axis.text.x= element_blank())
     } 
     else{
