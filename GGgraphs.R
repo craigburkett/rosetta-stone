@@ -172,7 +172,7 @@ gg_hist <- function(dd, dashPt = NA, iFreqPoly=F, iDensity=F, filename="", tit="
   
   if(ncol(dd) == 1){
     if(iFreqPoly) h = ggplot(dd, aes(x= num)) + geom_freqpoly()
-    else if(iDensity) h = ggplot(dd, aes(x= num, y = ..density..)) + geom_histogram(bins = myBins, colour= "black", fill= fillCol)
+    else if(iDensity) h = ggplot(dd, aes(x= num, y = after_stat(density))) + geom_histogram(bins = myBins, colour= "black", fill= fillCol)
     else          h = ggplot(dd, aes(x= num)) + geom_histogram(bins = myBins, colour= "black", fill= fillCol) 
   }    
   
@@ -189,7 +189,7 @@ gg_hist <- function(dd, dashPt = NA, iFreqPoly=F, iDensity=F, filename="", tit="
         facet_wrap(~ group)
     }
     else if(iFreqPoly){
-      h = h + geom_freqpoly(aes(y= ..density.., colour= group), bins = myBins, size= 1.5) +
+      h = h + geom_freqpoly(aes(y= after_stat(density), colour= group), bins = myBins, size= 1.5) +
         scale_colour_manual(values = colFunc(colourCount)) #+ theme(axis.text.x= element_blank())
     } 
     else{
@@ -205,7 +205,7 @@ gg_hist <- function(dd, dashPt = NA, iFreqPoly=F, iDensity=F, filename="", tit="
   if(!is.na(dashPt)) h = h + geom_vline(xintercept = dashPt, col = "blue", lty = 2)
   if(iLog)  h = h + scale_y_log10()
   if(iCoordFlip) h = h + coord_flip()
-  if(iNoLegend) h = h + guides(fill=FALSE, color=FALSE)
+  if(iNoLegend) h = h + guides(fill="none", color="none")
   if(trans) h = h + theme_BSC_trans()
   if(write) ggsave(paste0(filename, ".png"), width= plotWidth, height= plotHeight, units= "mm", dpi= dpiRes, bg = "transparent")
   if(echo) h
@@ -468,7 +468,7 @@ gg_time2 <- function(dd, xVar, yVar, idVar="", groupVar="", facetVar="", iAgg=F,
   if(iAgg && iErrorBars && AggType == "mean") p = p + geom_errorbar(aes(ymin = !!ensym(yVar) - CI, ymax = !!ensym(yVar) + CI), color="black", lty=2, width=0.1, position=pd)
   
   # Layers to add regardless
-  p = p + geom_line(position=pd) + geom_point(size=3, shape=21, fill="white", position=pd) # Add point last to have nice fill
+  p = p + geom_line(position=pd) + geom_point(linewidth=3, shape=21, fill="white", position=pd) # Add point last to have nice fill
   
   # Optional faceting
   if(facetVar != "" && iFreeScales) p = p + facet_wrap(as.formula(paste("~", facetVar)), scales = "free_y")
@@ -532,7 +532,7 @@ gg_time <- function(dd, xVar, yVar, idVar="", groupVar="", facetVar="", iAvg=F, 
   if(iAvg & iErrorBars) p = p + geom_errorbar(aes(ymin = !!ensym(yVar) - CI, ymax = !!ensym(yVar) + CI), color="black", width=0.1, position=pd)
   
   # Layers to add regardless
-  p = p + geom_line(position=pd) + geom_point(size=3, shape=21, fill="white", position=pd) # Add point last to have nice fill
+  p = p + geom_line(position=pd) + geom_point(linewidth=3, shape=21, fill="white", position=pd) # Add point last to have nice fill
   
   # Optional faceting
   if(facetVar != "" & iFreeScales) p = p + facet_wrap(as.formula(paste("~", facetVar)), scales = "free")
