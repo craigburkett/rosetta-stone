@@ -300,8 +300,8 @@ make_multi_plot <- function(dfr, catType="Bar", maxLevels=8, maxGroups=4, maxLab
   datClass = c("Date", "POSIXct")
   
   # Convert logicals to factor for now
-  if(xClass == "logical") dfr[1] = factor(dfr[1])
-  if(yClass == "logical") dfr[2] = factor(dfr[2])
+  if(xClass == "logical") dfr[[1]] = factor(dfr[[1]])
+  if(yClass == "logical") dfr[[2]] = factor(dfr[[2]])
   
   # Case 5: CAT x CAT x CAT (with "Jitter" request)
   if(ncol(dfr) == 3 & catType == "Jitter") {
