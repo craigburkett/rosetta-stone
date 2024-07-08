@@ -53,6 +53,8 @@ server <- function(input, output, session){
     req(input$filterDataVar1, input$filterDataSample)
     
     selectData() %>%
+      ungroup() %>%
+      
       {if(input$filterDataVar1 %in% factorList()) filter(., UQ(sym(input$filterDataVar1)) %in% input$filterDataLevel1) else .} %>%
       {if(input$filterDataVar1 %in% numberList() & !is.null(input$filterDataMin1)) filter(., UQ(sym(input$filterDataVar1)) >= input$filterDataMin1) else .} %>%
       {if(input$filterDataVar1 %in% numberList() & !is.null(input$filterDataMax1)) filter(., UQ(sym(input$filterDataVar1)) <= input$filterDataMax1) else .} %>%
@@ -74,8 +76,8 @@ server <- function(input, output, session){
     req(input$tabs == "Classification" && !is.null(input$predictorsClass) || input$tabs == "Regression" && !is.null(input$predictorsReg))
     
     filterData() %>%
-      {if(input$tabs == "Classification") select(., input$responseClass, input$predictorsClass) else .} %>%
-      {if(input$tabs == "Regression")     select(., input$responseReg,   input$predictorsReg)   else .} %>% 
+      {if(input$tabs == "Classification") select(., all_of(input$responseClass, input$predictorsClass)) else .} %>%
+      {if(input$tabs == "Regression")     select(., all_of(input$responseReg,   input$predictorsReg))   else .} %>% 
       drop_na() %>% # TODO: Remove after imputation feature made
       mutate_if(is.character, as.factor) %>%
       mutate_if(is.logical, as.integer) %>%
@@ -90,7 +92,7 @@ server <- function(input, output, session){
   summaryStats = reactive({
     req(input$tabs == "Bivariate", input$multivarX %in% names(filterData()), input$multivarY %in% names(filterData()))
     
-    filterData() %>% select(input$multivarX, input$multivarY) %>% get_summary_stats()
+    filterData() %>% select(all_of(input$multivarX, input$multivarY)) %>% get_summary_stats()
   })
     
   nTotal = reactive(  nrow(filterData())   ) # Printed text
@@ -386,7 +388,7 @@ server <- function(input, output, session){
   plotBar = reactive({
     req(input$facVar %in% names(selectData()))
     
-    filterData() %>% select(input$facVar) %>%
+    filterData() %>% select(all_of(input$facVar)) %>%
       gg_count(type= "Bar", x.lab = input$facVar, maxLevels = input$maxBarsUni, maxLabelL = input$maxLabelUni, 
                iLog = input$iLogBarUni, iLabel = input$iLabelBarUni, iPareto = input$iParetoUni, iRotateX = input$iRotateXUni)
   })
@@ -394,14 +396,14 @@ server <- function(input, output, session){
   plotHist = reactive({
     req(input$numVar %in% names(selectData()))
     
-    filterData() %>% select(input$numVar) %>%
+    filterData() %>% select(all_of(input$numVar)) %>%
       gg_hist(x.lab = input$numVar, myBins = input$numBinsHistUni, iLog = input$iLogHistUni)
   })
   
   plotDate = reactive({
     req(input$datVar %in% names(selectData()))
     
-    filterData() %>% select(input$datVar) %>% gg_polar_time()
+    filterData() %>% select(all_of(input$datVar)) %>% gg_polar_time()
   })
   
   plotPie = reactive({
@@ -420,7 +422,7 @@ server <- function(input, output, session){
     req(input$multivarX %in% names(filterData()), input$multivarY %in% names(filterData())) # , input$tabs == "Bivariate"
     
     filterData() %>%
-      {if(input$multivarG == "NONE") select(., input$multivarX, input$multivarY) else select(., input$multivarX, input$multivarY, input$multivarG)} %>%
+      {if(input$multivarG == "NONE") select(., all_of(input$multivarX, input$multivarY)) else select(., all_of(input$multivarX, input$multivarY, input$multivarG))} %>%
       make_multi_plot(input$catXcatType, input$maxLevelsMulti, input$maxGroupsMulti, input$maxLabelMulti, input$cutoffMulti, input$iParetoMulti, input$iLogMulti, 
                       input$iRotateXMulti, input$iFreqPoly, input$numBinsMulti, input$iLinearMulti, input$iXYMulti, input$iJitterMulti)
   })
@@ -526,7 +528,7 @@ server <- function(input, output, session){
     if(input$multivarX == input$multivarY) return(1)
     
     filterData() %>%
-      select(input$multivarX, input$multivarY) %>%
+      select(all_of(input$multivarX, input$multivarY)) %>%
       get_cor()
   })
     
@@ -547,7 +549,7 @@ server <- function(input, output, session){
     req(input$multivarX %in% names(filterData()), input$multivarY %in% names(filterData()), input$tabs == "Bivariate")
     
     filterData() %>%
-      select(input$multivarX, input$multivarY) %>% 
+      select(all_of(input$multivarX, input$multivarY)) %>% 
       complete.cases() %>% mean() %>% make_gauge()
   })
   
