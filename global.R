@@ -541,7 +541,7 @@ get_class_stats <- function(preds, actuals, probs, yesClass, propPos, alpha=1) {
   auc  = round(as.numeric(performance(rocPred, "auc")@y.values), 3) # AUC
   n    = sum(!is.na(preds))
   
-  randPreds = rbernoulli(n, propPos)
+  randPreds = rbinom(n, 1, propPos)
   skill = 1 - get_loss(preds == yesClass, actuals == yesClass) / get_loss(randPreds, actuals == yesClass)
   
   list(accuracy= acc, recall= tpr, precision= tpa, Fscore= f, FalphaScore= fAlpha, MCC= mcc, inform= inf, marked= mar, AUC= auc, skill= skill) # nData= n, tp=tp, tn=tn, fp=fp, fn=fn, 

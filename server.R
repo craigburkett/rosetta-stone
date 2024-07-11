@@ -76,8 +76,8 @@ server <- function(input, output, session){
     req(input$tabs == "Classification" && !is.null(input$predictorsClass) || input$tabs == "Regression" && !is.null(input$predictorsReg))
     
     filterData() %>%
-      {if(input$tabs == "Classification") select(., all_of(input$responseClass, input$predictorsClass)) else .} %>%
-      {if(input$tabs == "Regression")     select(., all_of(input$responseReg,   input$predictorsReg))   else .} %>% 
+      {if(input$tabs == "Classification") select(., all_of(c(input$responseClass, input$predictorsClass))) else .} %>%
+      {if(input$tabs == "Regression")     select(., all_of(c(input$responseReg,   input$predictorsReg)))   else .} %>% 
       drop_na() %>% # TODO: Remove after imputation feature made
       mutate_if(is.character, as.factor) %>%
       mutate_if(is.logical, as.integer) %>%
@@ -92,7 +92,7 @@ server <- function(input, output, session){
   summaryStats = reactive({
     req(input$tabs == "Bivariate", input$multivarX %in% names(filterData()), input$multivarY %in% names(filterData()))
     
-    filterData() %>% select(all_of(input$multivarX, input$multivarY)) %>% get_summary_stats()
+    filterData() %>% select(all_of(c(input$multivarX, input$multivarY))) %>% get_summary_stats()
   })
     
   nTotal = reactive(  nrow(filterData())   ) # Printed text
@@ -192,7 +192,7 @@ server <- function(input, output, session){
         form = reformulate(names(trainData()), response = input$responseClass),
         data = trainData(),
         trControl = trainControl(method = "repeatedcv", number = 3, repeats = 2), # TODO: Input
-        method = thisMethod
+        method = thisMethod[1]
       )
         
       setProgress(0.7, detail = 'Generating Predictions') 
@@ -422,7 +422,7 @@ server <- function(input, output, session){
     req(input$multivarX %in% names(filterData()), input$multivarY %in% names(filterData())) # , input$tabs == "Bivariate"
     
     filterData() %>%
-      {if(input$multivarG == "NONE") select(., all_of(input$multivarX, input$multivarY)) else select(., all_of(input$multivarX, input$multivarY, input$multivarG))} %>%
+      {if(input$multivarG == "NONE") select(., all_of(c(input$multivarX, input$multivarY))) else select(., all_of(c(input$multivarX, input$multivarY, input$multivarG)))} %>%
       make_multi_plot(input$catXcatType, input$maxLevelsMulti, input$maxGroupsMulti, input$maxLabelMulti, input$cutoffMulti, input$iParetoMulti, input$iLogMulti, 
                       input$iRotateXMulti, input$iFreqPoly, input$numBinsMulti, input$iLinearMulti, input$iXYMulti, input$iJitterMulti)
   })
@@ -528,7 +528,7 @@ server <- function(input, output, session){
     if(input$multivarX == input$multivarY) return(1)
     
     filterData() %>%
-      select(all_of(input$multivarX, input$multivarY)) %>%
+      select(all_of(c(input$multivarX, input$multivarY))) %>%
       get_cor()
   })
     
@@ -549,7 +549,7 @@ server <- function(input, output, session){
     req(input$multivarX %in% names(filterData()), input$multivarY %in% names(filterData()), input$tabs == "Bivariate")
     
     filterData() %>%
-      select(all_of(input$multivarX, input$multivarY)) %>% 
+      select(all_of(c(input$multivarX, input$multivarY))) %>% 
       complete.cases() %>% mean() %>% make_gauge()
   })
   

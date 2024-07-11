@@ -45,7 +45,8 @@ testData <- adult %>%
 # fit = glm(over50K_Flag ~ age + race, data= trainData, family = "binomial")
 # summary(fit)
 #
-## CARET
+#### CARET
+### GLM
 default_glm_mod = train(
   form = reformulate(names(trainData), response = yVarStr),
   data = trainData,
@@ -61,6 +62,55 @@ probs = predict(default_glm_mod, newdata = testData, type = "prob")[[yesClass]]
 propPos = 0.5
 
 get_class_stats(preds, actuals, probs, yesClass, propPos)
+
+### RF
+rf_model = train(
+  form = reformulate(names(trainData), response = "over50K_Flag"),
+  data = trainData[1:1000,],
+  trControl = trainControl(method = "repeatedcv", number = 3, repeats = 2),
+  method = "rf"
+)
+
+preds = predict(rf_model, newdata = testData)
+actuals = testData[[yVarStr]]
+yesClass = "Class_TRUE"
+probs = predict(rf_model, newdata = testData, type = "prob")[[yesClass]]
+propPos = 0.5
+
+get_class_stats(preds, actuals, probs, yesClass, propPos)
+
+### kNN
+knn_model = train(
+  form = reformulate(names(trainData), response = "over50K_Flag"),
+  data = trainData[1:1000,],
+  trControl = trainControl(method = "repeatedcv", number = 3, repeats = 2),
+  method = "knn"
+)
+
+preds = predict(knn_model, newdata = testData)
+actuals = testData[[yVarStr]]
+yesClass = "Class_TRUE"
+probs = predict(knn_model, newdata = testData, type = "prob")[[yesClass]]
+propPos = 0.5
+
+get_class_stats(preds, actuals, probs, yesClass, propPos)
+
+### XGBoost
+xgb_model = train(
+  form = reformulate(names(trainData), response = "over50K_Flag"),
+  data = trainData,
+  trControl = trainControl(method = "repeatedcv", number = 3, repeats = 2),
+  method = "xgbTree"
+)
+
+preds = predict(xgb_model, newdata = testData) # Error here, different var names
+actuals = testData[[yVarStr]]
+yesClass = "Class_TRUE"
+probs = predict(xgb_model, newdata = testData, type = "prob")[[yesClass]]
+propPos = 0.5
+
+get_class_stats(preds, actuals, probs, yesClass, propPos)
+
 
 ### FEATURE SELECTION
 # subsets <- c(1:5, 10, 15, 18)
