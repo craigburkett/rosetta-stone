@@ -186,7 +186,7 @@ server <- function(input, output, session){
       setProgress(0.1, detail = 'Training Model')
     
       ## Get caret-internal model name from lookup table
-      thisMethod = modelLookup$modelNameCaret[modelLookup$modelNameUI == input$classModelType]
+      thisMethod = modelLookup$modelNameCaret[modelLookup$modelNameUI == input$classModelType & modelLookup$modelMode == "Class"]
       
       rv$caretModel = train(
         form = reformulate(setdiff(names(trainData()), input$responseClass), response = input$responseClass),
@@ -258,7 +258,7 @@ server <- function(input, output, session){
       setProgress(0.1, detail = 'Training Model')
 
       ## Get caret-internal model name from lookup table
-      thisMethod = modelLookup$modelNameCaret[modelLookup$modelNameUI == input$regModelType]
+      thisMethod = modelLookup$modelNameCaret[modelLookup$modelNameUI == input$regModelType & modelLookup$modelMode == "Reg"]
 
       rv$caretModel = train(
         form = reformulate(setdiff(names(trainData()), input$responseReg), response = input$responseReg),

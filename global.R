@@ -28,10 +28,10 @@ manualRemoveList = c("")   # Any other vars you want removed from predictor list
 modelLookup = data.frame(
   modelMode = c("Class", "Class", "Class", "Class", 
                 "Reg", "Reg", "Reg", "Reg")
-  , modelNameUI = c("Logistic Regression", "Random Forest", "K-Nearest Neighbours", "XGBoost", 
+  , modelNameUI = c("Logistic Regression", "K-Nearest Neighbours", "Random Forest", "XGBoost", 
                     "Linear Regression", "K-Nearest Neighbours", "Random Forest", "XGBoost") # , "ADABoost", "C5.0"
-  , modelNameCaret = c("glm", "rf", "knn", "xgbTree", 
-                       "lm", "rf", "knn", "xgbTree") # names(getModelInfo()) # , "ada", "C5.0"
+  , modelNameCaret = c("glm", "knn", "rf", "xgbTree", 
+                       "lm", "knn", "rf", "xgbTree") # names(getModelInfo()) # , "ada", "C5.0"
 )
 
 ### -------------- ###

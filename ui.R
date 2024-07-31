@@ -292,7 +292,7 @@ body = dashboardBody(
                                             
                                             ,column(2 
                                                     ,numericInput("thresholdClass", "Prediction Threshold", 0.5, 0, 1, 0.02)
-                                                    ,checkboxInput("iOptimalThreshold", "Optimal Threshold", FALSE)
+                                                    ,checkboxInput("iOptimalThreshold", "Optimal Threshold", TRUE)
                                                     ,checkboxInput("iShowPlots", "Show ROC / PR plots", FALSE)
                                             )
                                             # ,column(2, radioButtons("effectTypeClass", "Plot Effects", 
@@ -372,7 +372,7 @@ body = dashboardBody(
                                 )
                                 ,column(3, radioButtons("regModelType", "Model:", modelLookup$modelNameUI[modelLookup$modelMode == "Reg"]))
                                 
-                                # ,column(2 
+                                # ,column(2
                                 #         , selectInput('numTreesReg', label = "Trees",
                                 #                       choices= c("50", "100", "200", "500", "1000", "2000"), selected = "100")
                                 #         , numericInput("topNEffectsReg", "Limit effects to:", 10, 2, 20, 1)
