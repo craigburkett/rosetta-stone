@@ -11,7 +11,8 @@ library(corrplot) # For bubble correlation plot
 library(ROCR)  # For ROC / PR curves
 library(caret, warn.conflicts = F) # Generalized modeling
 # library(ada) # For ADABoost modeling
-# library(randomForest) # For RF classification and forecasting - seems to be handled by caret somehow ...
+# library(randomForest) # For RF classification and forecasting - seems to be broken now ...
+# library(ranger) # For RF classification
 # library(iml) # For generalized effects
 library(shinycssloaders) # For waiting UI
 if(file.exists("GGgraphs.R")) source("GGgraphs.R")
@@ -45,7 +46,7 @@ lmp <- function (modelobject) {
 
 get_levels <- function(dfr, col) {
   dfr %>%
-    select(col) %>%
+    select(all_of(col)) %>%
     pull() %>%
     unique()
 }
@@ -115,7 +116,7 @@ get_dates <- function(classes) {
 
 get_range <- function(dfr, col) {
   dfr %>%
-    select(col) %>%
+    select(all_of(col)) %>%
     pull() %>%
     range(na.rm = T)
 }

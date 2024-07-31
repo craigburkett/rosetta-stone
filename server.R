@@ -108,7 +108,7 @@ server <- function(input, output, session){
     
     trainRowNumbers = createDataPartition(modelData()[[yVarStr]], p=1-input$testPerc/100, list=FALSE)
     
-    trainData = modelData() %>% slice(trainRowNumbers)
+    trainData = modelData() %>% slice(as.numeric(trainRowNumbers))
     trainX <- trainData %>% select(-all_of(yVarStr))
     trainY <- trainData %>% select( all_of(yVarStr))
     
@@ -134,10 +134,10 @@ server <- function(input, output, session){
     trainData = trainData %>% bind_cols(trainY)
     
     ## Pre-process test data in the same way
-    testY = modelData() %>% slice(-trainRowNumbers) %>% select(all_of(yVarStr))
+    testY = modelData() %>% slice(-as.numeric(trainRowNumbers)) %>% select(all_of(yVarStr))
     
     testData <- modelData() %>% 
-      slice(-trainRowNumbers) %>%
+      slice(-as.numeric(trainRowNumbers)) %>%
       {if(input$iImpute) predict(preProcess_missingdata_model, .) else .} %>%
       predict(dummies_model, .) %>%
       data.frame() %>%
@@ -189,7 +189,7 @@ server <- function(input, output, session){
       thisMethod = modelLookup$modelNameCaret[modelLookup$modelNameUI == input$classModelType]
       
       rv$caretModel = train(
-        form = reformulate(names(trainData()), response = input$responseClass),
+        form = reformulate(setdiff(names(trainData()), input$responseClass), response = input$responseClass),
         data = trainData(),
         trControl = trainControl(method = "repeatedcv", number = 3, repeats = 2), # TODO: Input
         method = thisMethod[1]

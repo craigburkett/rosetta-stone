@@ -1,13 +1,13 @@
 library(tidyverse)
 library(caret)
 
-adult = readRDS("adult.rds")
+adult = readRDS("adult.rds") %>% mutate(over50K_Flag = factor(paste0("Class_", over50K_Flag)))
 yVarStr = "hrsPerWeek"
 
 trainRowNumbers = createDataPartition(adult[[yVarStr]], p=0.8, list=FALSE)
 
-trainData = adult %>% slice(trainRowNumbers)
-testData  = adult %>% slice(-trainRowNumbers)
+trainData = adult %>% slice(as.numeric(trainRowNumbers))
+testData  = adult %>% slice(-as.numeric(trainRowNumbers))
 trainX <- trainData %>% select(-all_of(yVarStr))
 trainY <- trainData %>% select( all_of(yVarStr))
 testY  <-  testData %>% select( all_of(yVarStr))
@@ -18,7 +18,7 @@ trainData = predict(preProcess_missingdata_model, trainData)
 
 
 ## One-Hot Encoding Step
-form = reformulate(c("age", "relationship", "race"))
+form = reformulate(c("age", "sex", "educationNum"))
 dummies_model <- dummyVars(form, data=trainX)
 trainData = predict(dummies_model, trainData) %>% data.frame()
 
@@ -32,34 +32,73 @@ trainData = trainData %>% bind_cols(trainY)
 
 ## Pre-process test data in the same way
 testData <- adult %>%
-  slice(-trainRowNumbers) %>%
+  slice(-as.numeric(trainRowNumbers)) %>%
   predict(preProcess_missingdata_model, .) %>%
   predict(dummies_model, .) %>%
   data.frame() %>%
   predict(preProcess_range_model, .) %>%
   bind_cols(testY)
 
-### MODELING
+#### MODELING
 
-## CARET
-default_lm_mod = train(
-  form = reformulate(names(trainData), response = yVarStr),
+### CARET
+## GLM
+default_glm_mod = train(
+  form = reformulate(setdiff(names(trainData), yVarStr), response = yVarStr),
   data = trainData,
   trControl = trainControl(method = "repeatedcv", number = 3, repeats = 2),
-  method = "lm"
+  method = "glm"
 )
 
-xgb_mod = train(
+preds = predict(default_glm_mod, newdata = testData)
+actuals = testData[[yVarStr]]
+(mape = mean(abs((actuals - preds)/actuals)) * 100)
+
+## kNN
+knn_model = train(
+  form = reformulate(setdiff(names(trainData), yVarStr), response = yVarStr),
+  data = trainData[1:1000,],
+  trControl = trainControl(method = "repeatedcv", number = 3, repeats = 2),
+  method = "knn"
+)
+
+preds = predict(knn_model, newdata = testData)
+actuals = testData[[yVarStr]]
+(mape = mean(abs((actuals - preds)/actuals)) * 100)
+
+## RF
+rf_model = train(
+  form = reformulate(setdiff(names(trainData), yVarStr), response = yVarStr),
+  data = trainData[1:1000,],
+  trControl = trainControl(method = "repeatedcv", number = 3, repeats = 2),
+  method = "rf"
+)
+
+preds = predict(rf_model, newdata = testData)
+actuals = testData[[yVarStr]]
+yesClass = "Class_TRUE"
+probs = predict(rf_model, newdata = testData, type = "prob")[[yesClass]]
+propPos = 0.5
+
+get_class_stats(preds, actuals, probs, yesClass, propPos)
+
+
+## XGBoost
+xgb_model = train(
   form = reformulate(setdiff(names(trainData), yVarStr), response = yVarStr),
   data = trainData,
   trControl = trainControl(method = "repeatedcv", number = 3, repeats = 2),
   method = "xgbTree"
 )
 
-preds = predict(default_lm_mod, newdata = testData)
-preds = predict(xgb_mod, newdata = testData)
+preds = predict(xgb_model, newdata = testData) # Error here, different var names
 actuals = testData[[yVarStr]]
-(MSE = sum((preds-actuals)^2)/length(preds))
+yesClass = "Class_TRUE"
+probs = predict(xgb_model, newdata = testData, type = "prob")[[yesClass]]
+propPos = 0.5
+
+get_class_stats(preds, actuals, probs, yesClass, propPos)
+
 
 ### FEATURE SELECTION
 # subsets <- c(1:5, 10, 15, 18)
@@ -70,10 +109,10 @@ ctrl <- rfeControl(functions = rfFuncs,
                    repeats = 5,
                    verbose = FALSE)
 
-# lmProfile <- rfe(x=trainX, 
-#                  y=trainData[[yVarStr]],
-#                  sizes = subsets,
-#                  rfeControl = ctrl)
+lmProfile <- rfe(x=trainX, 
+                 y=trainData[[yVarStr]],
+                 sizes = subsets,
+                 rfeControl = ctrl)
 
 lmProfile
 

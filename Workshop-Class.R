@@ -1,13 +1,15 @@
 library(tidyverse)
 library(caret)
 
+source("global.R")
+
 adult = readRDS("adult.rds") %>% mutate(over50K_Flag = factor(paste0("Class_", over50K_Flag)))
 yVarStr = "over50K_Flag"
 
 trainRowNumbers = createDataPartition(adult[[yVarStr]], p=0.8, list=FALSE)
 
-trainData = adult %>% slice(trainRowNumbers)
-testData  = adult %>% slice(-trainRowNumbers)
+trainData = adult %>% slice(as.numeric(trainRowNumbers))
+testData  = adult %>% slice(-as.numeric(trainRowNumbers))
 trainX <- trainData %>% select(-all_of(yVarStr))
 trainY <- trainData %>% select( all_of(yVarStr))
 testY  <-  testData %>% select( all_of(yVarStr))
@@ -18,7 +20,7 @@ trainData = predict(preProcess_missingdata_model, trainData)
 
 
 ## One-Hot Encoding Step
-form = reformulate(c("age", "relationship", "race"))
+form = reformulate(c("age", "sex", "hrsPerWeek"))
 dummies_model <- dummyVars(form, data=trainX)
 trainData = predict(dummies_model, trainData) %>% data.frame()
 
@@ -32,7 +34,7 @@ trainData = trainData %>% bind_cols(trainY)
 
 ## Pre-process test data in the same way
 testData <- adult %>%
-  slice(-trainRowNumbers) %>%
+  slice(-as.numeric(trainRowNumbers)) %>%
   predict(preProcess_missingdata_model, .) %>%
   predict(dummies_model, .) %>%
   data.frame() %>%
@@ -48,7 +50,7 @@ testData <- adult %>%
 #### CARET
 ### GLM
 default_glm_mod = train(
-  form = reformulate(names(trainData), response = yVarStr),
+  form = reformulate(setdiff(names(trainData), yVarStr), response = yVarStr),
   data = trainData,
   trControl = trainControl(method = "repeatedcv", number = 3, repeats = 2),
   method = "glm",
@@ -65,7 +67,7 @@ get_class_stats(preds, actuals, probs, yesClass, propPos)
 
 ### RF
 rf_model = train(
-  form = reformulate(names(trainData), response = "over50K_Flag"),
+  form = reformulate(setdiff(names(trainData), yVarStr), response = yVarStr),
   data = trainData[1:1000,],
   trControl = trainControl(method = "repeatedcv", number = 3, repeats = 2),
   method = "rf"
@@ -81,7 +83,7 @@ get_class_stats(preds, actuals, probs, yesClass, propPos)
 
 ### kNN
 knn_model = train(
-  form = reformulate(names(trainData), response = "over50K_Flag"),
+  form = reformulate(setdiff(names(trainData), yVarStr), response = yVarStr),
   data = trainData[1:1000,],
   trControl = trainControl(method = "repeatedcv", number = 3, repeats = 2),
   method = "knn"
@@ -97,7 +99,7 @@ get_class_stats(preds, actuals, probs, yesClass, propPos)
 
 ### XGBoost
 xgb_model = train(
-  form = reformulate(names(trainData), response = "over50K_Flag"),
+  form = reformulate(setdiff(names(trainData), yVarStr), response = yVarStr),
   data = trainData,
   trControl = trainControl(method = "repeatedcv", number = 3, repeats = 2),
   method = "xgbTree"
